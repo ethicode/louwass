@@ -1,0 +1,3 @@
+pour creer une application dans le dossier apps on cree le dossier de l'application d'abord par exemple users et on tape la commande:
+django-admin startapp users apps/users
+pip install djangorestframework-simplejwt
