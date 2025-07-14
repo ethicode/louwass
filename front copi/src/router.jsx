@@ -15,7 +15,7 @@ const router = createBrowserRouter([
   // { path: "/dashboard", element: <Home /> },
   { path: "/mes-publications", element: <Login /> },
   { path: "/listings/:id", element: <PropertyDetail /> },
-  { path: "/listings/search/?tite=:text", element: <Search /> },
+  { path: "/listings/search/?search=:text", element: <Search /> },
   { path: "/categories/:id", element: <CategoryDetail /> },
   { path: "/categories/:id", element: <CategoryDetail /> },
   { path: "/categories/:id/listings", element: <CategoryDetail /> },

@@ -21,15 +21,15 @@ function Home() {
         <div>
             <Navbar />
             {/* <h1>Liste des biens</h1> */}
-            <Toolbar />
+            <Toolbar/>
             <Container>
                 <Category />
                 <Searchbar />
-
+                
                 <Box sx={{ fontWeight: 'bold', m: 0, fontSize: 20, marginTop: '70px' }}>Pour les vacances</Box>
                 <Grid container spacing={2} sx={{ marginTop: '10px' }}>
                     {listings.map((listing) => (
-                        <Grid size={{ xs: 6, md: 3 }}>
+                        <Grid size={{ xs: 6, md: 2 }}>
                             <ListingCard key={listing.id} listing={listing} />
                         </Grid>
                     )

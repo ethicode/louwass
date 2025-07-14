@@ -56,6 +56,17 @@ class MyListingViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return Listing.objects.filter(owner=user)
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        listing = serializer.save()
+
+        # Gérer plusieurs images
+        for file in request.FILES.getlist('media'):
+            ListingImage.objects.create(listing=listing, image=file)
+
+        return Response(ListingSerializer(listing).data, status=201)
 
 # class MyListingViewSet(APIView):
 #     serializer_class = ListingSerializer

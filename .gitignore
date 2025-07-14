@@ -36,6 +36,7 @@ __pycache__/
 .Python
 env/
 louass_backend/media
+louass_backend/listing_media
 louass_backend/env
 build/
 develop-eggs/

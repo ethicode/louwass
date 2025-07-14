@@ -20,19 +20,39 @@ const commonStyles = {
 
 };
 
+const itemData = [
+    {
+        img: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e',
+        title: 'Breakfast',
+        rows: 2,
+        cols: 2,
+    },
+    {
+        img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d',
+        title: 'Burger',
+    },
+    {
+        img: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45',
+        title: 'Camera',
+    },
+    {
+        img: 'https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c',
+        title: 'Coffee',
+        cols: 2,
+    },
+];
+
 function PropertyDetail() {
     const { id } = useParams();
-    const [property, setProperty] = useState([]);
-    const [image, setImage] = useState([]);
+    const [property, setProperty] = useState(null);
 
     useEffect(() => {
-        console.log('property.media')
         getPropertyById(id)
             .then((res) => setProperty(res.data))
             .catch((err) => console.error(err));
     }, [id]);
 
-    // if (!property) return <p>Chargement...</p>;
+    if (!property) return <p>Chargement...</p>;
 
     return (
         <div>
@@ -52,11 +72,10 @@ function PropertyDetail() {
                             cols={4}
                             rowHeight={300}
                         >
-                            {property.media && property.media.map((item, index) => (
-                                <ImageListItem key={item.id}>
+                            {itemData.map((item) => (
+                                <ImageListItem key={item.img} cols={item.cols || 1} rows={item.rows || 1}>
                                     <img
-                                        srcSet={`${item.file}?w=164&h=164&fit=crop&auto=format&dpr=2 2x`}
-                                        src={`${item.file}?w=164&h=164&fit=crop&auto=format`}
+                                        {...srcset(item.img, 2000, item.rows, item.cols)}
                                         alt={item.title}
                                         loading="lazy"
                                     />
@@ -64,7 +83,6 @@ function PropertyDetail() {
                             ))}
                         </ImageList>
                     </Paper >
-                    <hr />
                     <Typography component="div">
                         <Box sx={{ fontWeight: 'medium', m: 1 }}>{property.type} {property.location}</Box>
                         <Box sx={{ fontWeight: 'bold', m: 1 }}>{property.price_per_day}</Box>
