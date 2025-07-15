@@ -2,25 +2,35 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
-import { Autocomplete, Box, Container, FormControl, InputLabel, MenuItem, Paper, Select, TextField } from '@mui/material';
-import match from 'autosuggest-highlight/match';
-import parse from 'autosuggest-highlight/parse';
+import { Box, Container, FormControl, IconButton, InputLabel, MenuItem, Paper, Select, TextField } from '@mui/material';
 import { getCategories } from '../services/categoryService';
 import { useNavigate } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 
 const CreateListing = () => {
 
     const [categories, setCategories] = useState([]);
     const navigate = useNavigate();
 
+
+    const [files, setFiles] = React.useState([]);
+    const [imagePreviews, setImagePreviews] = React.useState([]);
+
     useEffect(() => {
         getCategories()
             .then((res) => setCategories(res.data))
             .catch((err) => console.error("Erreur chargement catégories", err));
     }, []);
+
+    useEffect(() => {
+        return () => {
+            imagePreviews.forEach(url => URL.revokeObjectURL(url));
+        };
+    }, [imagePreviews]);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -33,7 +43,6 @@ const CreateListing = () => {
         owner: 1,
     });
 
-    const [file, setFile] = useState(null);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(null);
 
@@ -46,22 +55,30 @@ const CreateListing = () => {
         }));
     };
 
-    const [files, setFiles] = React.useState([]);
-    const [imagePreviews, setImagePreviews] = React.useState([]);
-
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
-        setFiles(selectedFiles);
-        setImagePreviews(selectedFiles.map(file => URL.createObjectURL(file)));
+
+        setFiles(prevFiles => {
+            const allFiles = [...prevFiles];
+            selectedFiles.forEach(file => {
+                if (!prevFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    allFiles.push(file);
+                }
+            });
+            return allFiles;
+        });
+
+        const newPreviews = selectedFiles.map(file => URL.createObjectURL(file));
+        setImagePreviews(prevPreviews => [...prevPreviews, ...newPreviews]);
     };
 
-
-    const handleFileChange2 = (event) => {
-        const files = event.target.files;
-        if (files) {
-            const imageUrls = Array.from(files).map(file => URL.createObjectURL(file));
-            setImagePreviews(imageUrls);
-        }
+    const handleRemoveImage = (indexToRemove) => {
+        setFiles(prevFiles => prevFiles.filter((_, index) => index !== indexToRemove));
+        setImagePreviews(prevPreviews => {
+            // Révoque l'URL pour éviter une fuite mémoire
+            URL.revokeObjectURL(prevPreviews[indexToRemove]);
+            return prevPreviews.filter((_, index) => index !== indexToRemove);
+        });
     };
 
     const handleSubmit = async e => {
@@ -153,6 +170,7 @@ const CreateListing = () => {
                                 </Select>
                             </FormControl>
                             <Button
+                                sx={{ mt: '10px' }}
                                 component="label"
                                 role={undefined}
                                 variant="contained"
@@ -169,16 +187,57 @@ const CreateListing = () => {
                             </Button>
                             <Box mt={2} display="flex" flexWrap="wrap" gap={2}>
                                 {imagePreviews.map((src, index) => (
-                                    <img
+                                    <Box
                                         key={index}
-                                        src={src}
-                                        alt={`preview-${index}`}
-                                        style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 8 }}
-                                    />
+                                        position="relative"
+                                        width={100}
+                                        height={100}
+                                        sx={{ borderRadius: 2, overflow: 'hidden' }}
+                                    >
+                                        <img
+                                            src={src}
+                                            alt={`preview-${index}`}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        />
+                                        <IconButton variant="contained" color="error" aria-label="delete" size="small" onClick={() => handleRemoveImage(index)} sx={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            right: 0,
+                                            minWidth: 0,
+                                            width: 24,
+                                            height: 24,
+                                            borderRadius: '50%',
+                                            padding: 0,
+                                            // fontSize: '0.75rem',
+                                            lineHeight: 1,
+                                        }}>
+                                            <CloseIcon fontSize="inherit" />
+                                        </IconButton>
+
+                                        {/* <Button
+                                            size="small"
+                                            variant="contained"
+                                            color="error"
+                                            onClick={() => handleRemoveImage(index)}
+                                            sx={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                right: 0,
+                                                minWidth: 0,
+                                                width: 24,
+                                                height: 24,
+                                                borderRadius: '50%',
+                                                padding: 0,
+                                                fontSize: '0.75rem',
+                                                lineHeight: 1,
+                                            }}
+                                        >
+                                            ×
+                                        </Button> */}
+                                    </Box>
                                 ))}
                             </Box>
 
-                            <TextField type="file" onChange={handleFileChange2} accept="image/*" /><br /><br />
 
                             <Button type="submit" variant="contained" sx={{ m: 1 }}>
                                 Publier
